@@ -1,7 +1,7 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from datetime import datetime, timedelta
-
+ 
 # Головне меню
 def get_main_menu_kb() -> ReplyKeyboardMarkup:
     kb = [
@@ -9,7 +9,7 @@ def get_main_menu_kb() -> ReplyKeyboardMarkup:
         [KeyboardButton(text="📍 Де ми знаходимось?"), KeyboardButton(text="📞 Контакти")]
     ]
     return ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
-
+ 
 # Вибір категорії
 def get_categories_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
@@ -17,7 +17,7 @@ def get_categories_kb() -> InlineKeyboardMarkup:
     builder.button(text="👩 Жіночий зал", callback_data="category_female")
     builder.adjust(2)
     return builder.as_markup()
-
+ 
 # Чоловічі послуги
 def get_male_services_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
@@ -34,7 +34,7 @@ def get_male_services_kb() -> InlineKeyboardMarkup:
     builder.adjust(1)
     builder.row(InlineKeyboardButton(text="⬅️ Назад", callback_data="back_to_categories"))
     return builder.as_markup()
-
+ 
 # Жіночі послуги
 def get_female_services_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
@@ -44,7 +44,7 @@ def get_female_services_kb() -> InlineKeyboardMarkup:
     builder.adjust(1)
     builder.row(InlineKeyboardButton(text="⬅️ Назад", callback_data="back_to_categories"))
     return builder.as_markup()
-
+ 
 # Динамічні кнопки для вибору ДАТИ (найближчі 5 днів)
 def get_dates_kb() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
@@ -74,19 +74,24 @@ def get_dates_kb() -> InlineKeyboardMarkup:
         
     builder.adjust(1)
     return builder.as_markup()
-
-# Кнопки для вибору ЧАСУ (Слоти роботи салону)
-def get_time_slots_kb() -> InlineKeyboardMarkup:
+ 
+# Кнопки для вибору ЧАСУ (Слоти роботи салону), з урахуванням вже зайнятих
+def get_time_slots_kb(date_str: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     # Припустимо, салон працює з 09:00 до 17:00 щогодини
     slots = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"]
-    
+ 
+    import database
+    booked = set(database.get_booked_times(date_str))
+ 
     for slot in slots:
+        if slot in booked:
+            continue  # Зайнятий слот клієнту не показуємо
         builder.button(text=slot, callback_data=f"time_{slot}")
-        
+ 
     builder.adjust(3) # Кнопки по 3 в ряд, щоб виглядало як сітка
     return builder.as_markup()
-
+ 
 # Кнопка для швидкої відправки телефону
 def get_phone_kb() -> ReplyKeyboardMarkup:
     kb = [

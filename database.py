@@ -1,8 +1,8 @@
 # database.py
 import sqlite3
-
+ 
 DB_NAME = "barber.db"
-
+ 
 def init_db():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -39,9 +39,9 @@ def init_db():
     
     conn.commit()
     conn.close()
-
+ 
 # --- ФУНКЦІЇ ДЛЯ РОБОТИ З ЗАПИСАМИ ---
-
+ 
 def add_booking(user_id, full_name, phone, service, date, time):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -53,41 +53,65 @@ def add_booking(user_id, full_name, phone, service, date, time):
     conn.commit()
     conn.close()
     return booking_id
-
+ 
 def update_booking_status(booking_id, status):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("UPDATE bookings SET status = ? WHERE id = ?", (status, booking_id))
     conn.commit()
     conn.close()
-
+ 
 def delete_booking(booking_id):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM bookings WHERE id = ?", (booking_id,))
     conn.commit()
     conn.close()
-
+ 
 # --- ФУНКЦІЇ ДЛЯ АДМІНІСТРУВАННЯ ГРАФІКУ ---
-
+ 
 def block_date(date):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("INSERT OR IGNORE INTO blocked_dates (date) VALUES (?)", (date,))
     conn.commit()
     conn.close()
-
+ 
 def unblock_date(date):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM blocked_dates WHERE date = ?", (date,))
     conn.commit()
     conn.close()
-
+ 
 def is_date_blocked(date):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("SELECT 1 FROM blocked_dates WHERE date = ?", (date,))
+    result = cursor.fetchone()
+    conn.close()
+    return result is not None
+ 
+def get_booked_times(date):
+    """Повертає список часів, які вже зайняті записами на дану дату."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT time FROM bookings WHERE date = ? AND status != 'скасовано'",
+        (date,)
+    )
+    result = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return result
+ 
+def is_slot_taken(date, time):
+    """Перевіряє, чи конкретний слот (дата+час) вже зайнятий."""
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT 1 FROM bookings WHERE date = ? AND time = ? AND status != 'скасовано'",
+        (date, time)
+    )
     result = cursor.fetchone()
     conn.close()
     return result is not None
