@@ -80,7 +80,7 @@ def block_date(date):
 def unblock_date(date):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM blocked_dates WHERE开 date = ?", (date,))
+    cursor.execute("DELETE FROM blocked_dates WHERE date = ?", (date,))
     conn.commit()
     conn.close()
 

@@ -1,0 +1,14 @@
+# Секрети
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# База даних (локальна, не для гіт)
+barber.db
+
+# IDE
+.vscode/
+.idea/
